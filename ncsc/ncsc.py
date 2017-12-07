@@ -9,11 +9,18 @@ def getSoupFromUrl(url):
     html = response.content
     return BeautifulSoup(html, "html.parser")
 
+def parseAdvisoryPage(url):
+    response = getSoupFromUrl(url)
+    advisory = {}
+    advisory['title'] = response.select('.advisoryitem h3')[0].contents[0].strip()
+
+    return advisory
+
 def main():
     url = "https://www.ncsc.nl/dienstverlening/response-op-dreigingen-en-incidenten/beveiligingsadviezen/NCSC-2017-1058+1.00+Kwetsbaarheden+verholpen+in+Apple+iOS.html"
-    soup = getSoupFromUrl(url)
+    advisory = parseAdvisoryPage(url)
 
-    print(soup)
+    print(advisory)
 
 if __name__ == '__main__':
     main()
