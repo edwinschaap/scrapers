@@ -1,1 +1,6 @@
 This project contains scrapers.
+
+Scripts run on Python 3 with:
+- requests
+- beautifulsoup4
+- python-gnupg
