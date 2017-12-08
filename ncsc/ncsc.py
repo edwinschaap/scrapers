@@ -6,6 +6,10 @@ import requests, gnupg, re, pprint, argparse
 import json, sys
 
 gpg = None
+args = None
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def getSoupFromUrl(url):
     response = requests.get(url)
@@ -43,6 +47,7 @@ def getAdvisoryPages(max = 3):
         response = getSoupFromUrl(baseUrl + pageUrl)
         for p in response.select('.advisoryitem h2 a'):
             advisory_pages.append('https://www.ncsc.nl'+p['href'])
+            eprint("Total advisories to fetch: %d" % len(advisory_pages), end="\r")
             if max !=0 and len(advisory_pages) >= max:
                 return advisory_pages
         pageUrl = response.select('a.next')[0]['href']
@@ -52,20 +57,24 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='A scraper for fetching advisories from the ncsc.nl website.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-n', type=int, help='Number of advisories to fetch', default=5)
     parser.add_argument('-p','--pgp,', action='store_true', help='Enable PGP signature verification', default=False, dest='pgp')
+    parser.add_argument('-w','--writefile', help='Write output to file')
     args = parser.parse_args()
     return args
 
 def main():
-    global gpg
+    global gpg, args
     args = parse_arguments()
 
     if args.pgp:
         gpg = gnupg.GPG()
     advisories = []
     advisory_pages = getAdvisoryPages(args.n)
+    eprint("\nAdvisories fetched: 0", end="\r")
     for url in advisory_pages:
         advisories.append(parseAdvisoryPage(url))
-
+        eprint("Advisories fetched: %d" % len(advisories), end="\r")
+    eprint()
     json.dump(advisories, sys.stdout)
+
 if __name__ == '__main__':
     main()
