@@ -2,7 +2,7 @@
 # Scrape advisories from ncsc.nl
 
 from bs4 import BeautifulSoup
-import requests, gnupg, re, pprint
+import requests, gnupg, re, pprint, argparse
 
 gpg = None
 
@@ -46,12 +46,19 @@ def getAdvisoryPages(max = 3):
         pageUrl = response.select('a.next')[0]['href']
     return advisory_pages
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='A scraper for fetching advisories from the ncsc.nl website.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-n', type=int, help='Number of advisories to fetch', default=5)
+    args = parser.parse_args()
+    return args
 
 def main():
     global gpg
+    args = parse_arguments()
+
     gpg = gnupg.GPG()
     advisories = []
-    advisory_pages = getAdvisoryPages(10)
+    advisory_pages = getAdvisoryPages(args.n)
     for url in advisory_pages:
         advisories.append(parseAdvisoryPage(url))
 
