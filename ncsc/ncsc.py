@@ -16,7 +16,8 @@ def parseAdvisoryPage(url):
     advisory = {}
     advisory['title'] = response.select('.advisoryitem h3')[0].contents[0].strip()
     advisory['message'] = response.select('.advisoryitem pre')[0].contents[0]
-    advisory['verified'] = gpg.verify(advisory['message'])
+    if gpg:
+        advisory['verified'] = gpg.verify(advisory['message'])
     advisory['id'] = re.findall(r'Advisory ID\s*:(.+)', advisory['message'])[0].strip()
     advisory['version'] = re.findall(r'Versie\s*:(.+)', advisory['message'])[0].strip()
     advisory['probability'] = re.findall(r'Kans\s*:(.+)', advisory['message'])[0].strip()
@@ -49,6 +50,7 @@ def getAdvisoryPages(max = 3):
 def parse_arguments():
     parser = argparse.ArgumentParser(description='A scraper for fetching advisories from the ncsc.nl website.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-n', type=int, help='Number of advisories to fetch', default=5)
+    parser.add_argument('-p','--pgp,', action='store_true', help='Enable PGP signature verification', default=False, dest='pgp')
     args = parser.parse_args()
     return args
 
@@ -56,7 +58,8 @@ def main():
     global gpg
     args = parse_arguments()
 
-    gpg = gnupg.GPG()
+    if args.pgp:
+        gpg = gnupg.GPG()
     advisories = []
     advisory_pages = getAdvisoryPages(args.n)
     for url in advisory_pages:
