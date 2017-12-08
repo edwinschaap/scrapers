@@ -2,7 +2,7 @@
 # Scrape advisories from ncsc.nl
 
 from bs4 import BeautifulSoup
-import requests, gnupg, re, pprint, argparse
+import requests, gnupg, re, argparse
 import json, sys
 
 gpg = None
