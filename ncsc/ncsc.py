@@ -58,6 +58,7 @@ def parse_arguments():
     parser.add_argument('-n', type=int, help='Number of advisories to fetch', default=5)
     parser.add_argument('-p','--pgp,', action='store_true', help='Enable PGP signature verification', default=False, dest='pgp')
     parser.add_argument('-w','--writefile', help='Write output to file', dest='writefile')
+    parser.add_argument('-u','--unique', action='store_true', help="Only include the latest advisory and omit previous ones", default=False, dest='unique')
     args = parser.parse_args()
     return args
 
@@ -71,7 +72,12 @@ def main():
     advisory_pages = getAdvisoryPages(args.n)
     eprint("\nAdvisories fetched: 0", end="\r")
     for url in advisory_pages:
-        advisories.append(parseAdvisoryPage(url))
+        advisory = parseAdvisoryPage(url)
+        if args.unique:
+            if not next((x for x in advisories if x['id'] == advisory['id']), None):
+                advisories.append(advisory)
+        else:
+            advisories.append(advisory)
         eprint("Advisories fetched: %d" % len(advisories), end="\r")
     eprint()
 
