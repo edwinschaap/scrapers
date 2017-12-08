@@ -57,7 +57,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='A scraper for fetching advisories from the ncsc.nl website.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-n', type=int, help='Number of advisories to fetch', default=5)
     parser.add_argument('-p','--pgp,', action='store_true', help='Enable PGP signature verification', default=False, dest='pgp')
-    parser.add_argument('-w','--writefile', help='Write output to file')
+    parser.add_argument('-w','--writefile', help='Write output to file', dest='writefile')
     args = parser.parse_args()
     return args
 
@@ -74,7 +74,12 @@ def main():
         advisories.append(parseAdvisoryPage(url))
         eprint("Advisories fetched: %d" % len(advisories), end="\r")
     eprint()
-    json.dump(advisories, sys.stdout)
+
+    if args.writefile:
+        with open(args.writefile, 'w') as outfile:
+            json.dump(advisories, outfile)
+    else:
+        json.dump(advisories, sys.stdout)
 
 if __name__ == '__main__':
     main()
