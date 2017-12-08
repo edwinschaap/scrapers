@@ -32,14 +32,27 @@ def parseAdvisoryPage(url):
 
     return advisory
 
+def getAdvisoryPages(max = 3):
+    baseUrl = 'https://www.ncsc.nl/actueel/beveiligingsadviezen?r13_r1_r1:page='
+    advisory_pages = []
+
+    response = getSoupFromUrl(baseUrl + '1')
+    for p in response.select('.advisoryitem h2 a'):
+        advisory_pages.append('https://www.ncsc.nl'+p['href'])
+        if max !=0 and len(advisory_pages) >= max:
+            return advisory_pages
+    return advisory_pages
+
+
 def main():
     global gpg
     gpg = gnupg.GPG()
-    url = "https://www.ncsc.nl/dienstverlening/response-op-dreigingen-en-incidenten/beveiligingsadviezen/NCSC-2017-1058+1.00+Kwetsbaarheden+verholpen+in+Apple+iOS.html"
-    advisory = parseAdvisoryPage(url)
+    advisories = []
+    advisory_pages = getAdvisoryPages()
+    for url in advisory_pages:
+        advisories.append(parseAdvisoryPage(url))
 
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(advisory)
+    print('Advisories fetched: %d' % len(advisories))
 
 if __name__ == '__main__':
     main()
