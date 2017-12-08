@@ -3,6 +3,7 @@
 
 from bs4 import BeautifulSoup
 import requests, gnupg, re, pprint, argparse
+import json, sys
 
 gpg = None
 
@@ -29,7 +30,7 @@ def parseAdvisoryPage(url):
     advisory['solution'] =  re.findall(r'Mogelijke oplossingen(.+)Vrijwaringsverklaring', advisory['message'], re.DOTALL)[0]
 
     # Find all CVE IDs in the advisory
-    advisory['CVE'] = set(re.findall(r'(CVE-\d{4}-(?:0\d{3}|[1-9]\d{3,}))', advisory['message']))
+    advisory['CVE'] = list(set(re.findall(r'(CVE-\d{4}-(?:0\d{3}|[1-9]\d{3,}))', advisory['message'])))
 
     return advisory
 
@@ -65,7 +66,6 @@ def main():
     for url in advisory_pages:
         advisories.append(parseAdvisoryPage(url))
 
-    print('Advisories fetched: %d' % len(advisories))
-
+    json.dump(advisories, sys.stdout)
 if __name__ == '__main__':
     main()
