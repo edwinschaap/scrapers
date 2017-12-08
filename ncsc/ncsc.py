@@ -33,14 +33,17 @@ def parseAdvisoryPage(url):
     return advisory
 
 def getAdvisoryPages(max = 3):
-    baseUrl = 'https://www.ncsc.nl/actueel/beveiligingsadviezen?r13_r1_r1:page='
+    baseUrl = 'https://www.ncsc.nl'
     advisory_pages = []
 
-    response = getSoupFromUrl(baseUrl + '1')
-    for p in response.select('.advisoryitem h2 a'):
-        advisory_pages.append('https://www.ncsc.nl'+p['href'])
-        if max !=0 and len(advisory_pages) >= max:
-            return advisory_pages
+    pageUrl = '/actueel/beveiligingsadviezen'
+    while pageUrl:
+        response = getSoupFromUrl(baseUrl + pageUrl)
+        for p in response.select('.advisoryitem h2 a'):
+            advisory_pages.append('https://www.ncsc.nl'+p['href'])
+            if max !=0 and len(advisory_pages) >= max:
+                return advisory_pages
+        pageUrl = response.select('a.next')[0]['href']
     return advisory_pages
 
 
@@ -48,7 +51,7 @@ def main():
     global gpg
     gpg = gnupg.GPG()
     advisories = []
-    advisory_pages = getAdvisoryPages()
+    advisory_pages = getAdvisoryPages(10)
     for url in advisory_pages:
         advisories.append(parseAdvisoryPage(url))
 
